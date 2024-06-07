@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        body{
+            background-image:url("game.jpeg");
+            background-repeat: no-repeat;
+            background-size:cover;
+        }
+        p {
+            font-size: 50px;
+            color:darkblue;
+            text-align:center;
+            font-family:"Times New Roman", Times, serif; 
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0% {font-size: 50px;}
+            25% {font-size: 52.5px;}
+            50% {font-size: 55px;}
+            75% {font-size: 52.5px;}
+            100% {font-size: 50px;}
+        }
+    </style>
+</head>
+<body>
+    <p>PREMI INVIO PER GIOCARE</p>
+    <script>
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                window.location="progetto.html";
+            }
+        });
+
+    </script>
+</body>
+</html>

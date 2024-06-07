@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>luigi RACE</title>
+    <style>
+        body{
+            margin:0;
+            background-image: url("mariobros_back.jpg");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+        .campo{
+            width: auto;
+            height: 400px;
+            margin-top: 15%;
+            background-color: white;
+        }
+        .cielo{
+            width: auto;
+            height: 200px;
+            background-color: aqua;
+            position: relative;
+        }
+        .terreno{
+            width: auto;
+            height: 200px;
+            background-image: url("terreno.jpg");
+        }
+        .personaggio{
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            transition: transform 0.01s;
+        }
+        .boss{
+            height: 120px;
+            width: auto;
+        }
+        .fireball{
+            position: absolute;
+            height: 20px;
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+    <audio autoplay loop>
+        <source src="Super Mario Bros Theme Song.mp3" type="audio/mpeg">
+    </audio>
+    <div class="campo">
+        <div class="cielo">
+            <img src="koopa.gif" style="position: absolute; top: 130px; left: 650px; height: 50px; width: auto;" id="koopa">
+            <img src="bowser.gif" class="boss" id="bowser" style="position: absolute; top:88px; left: 750px;">
+            <img src="luigi.png" class="personaggio" id="luigi" style="height: 35px; width: auto;">
+        </div>
+        <div class="terreno"></div>
+    </div>
+    <script type="text/javascript">
+        let koopa= document.getElementById('koopa');
+        let luigi = document.getElementById('luigi');
+        let bowser = document.getElementById('bowser');
+        let speed = 2; // Velocità di movimento di luigi
+        let direction = 0; // Direzione di luigi
+        let keys = {};
+        let isMoving = false;
+        let isJumping = false; // Stato di salto di luigi
+        let verticalSpeed = 0; // Velocità verticale di luigi
+        let gravity = 0.3; // Forza di gravità
+        let groundLevel = 0; // Livello del terreno
+        let bowserDirection = -1; // Direzione di Bowser per il salto
+        let isBowserJumping = false; // Stato di salto di Bowser
+        let bowserVerticalSpeed = 0; // Velocità verticale di Bowser
+        let bowserGroundLevel = 88; // Livello del terreno di Bowser (posizione top iniziale)
+        let vite= 3;
+        let speed_koopa = 1;
+        let koopa_dir = 1;
+        const luigiInitialPosition = {left: "0px", bottom: "0px"}; // Posizione iniziale di luigi
+
+        window.addEventListener('keydown', function(event) {
+            keys[event.key] = true;
+        });
+
+        window.addEventListener('keyup', function(event) {
+            keys[event.key] = false;
+        });
+
+        setInterval(function() {
+            koopa_dir = koopa_dir * -1;
+        }, 1000);
+
+        function gameLoop() {
+
+            if(koopa_dir==1){
+                koopa.style.top = (koopa.offsetTop - speed_koopa) + "px";
+            }
+            if(koopa_dir==-1){
+                koopa.style.top = (koopa.offsetTop + speed_koopa) + "px";
+            }
+            let luigiPos = luigi.offsetLeft + luigi.offsetWidth / 2;
+            let koopaPos = koopa.offsetLeft + koopa.offsetWidth / 2;
+
+            if (Math.abs(luigiPos - koopaPos) < (luigi.offsetWidth + koopa.offsetWidth) / 2) {
+                let luigiTop = luigi.offsetTop;
+                let luigiBottom = luigi.offsetTop + luigi.offsetHeight;
+                let koopaTop = koopa.offsetTop;
+                let koopaBottom = koopa.offsetTop + koopa.offsetHeight;
+
+                if (!(luigiBottom < koopaTop || luigiTop > koopaBottom)) {
+                    luigi.style.left = "0px";
+                    vite-=1;
+                    if(vite!==0){
+                        console.log("Hai perso una vita");
+                    }
+                    if(vite==0){
+                        window.location="game_over.html";
+                        console.log("game over");
+                    }
+                }
+            }
+
+            if (keys["ArrowLeft"] && luigi.offsetLeft >= 0) {
+                if (!isMoving) {
+                    document.getElementById("luigi").src = "running_luigi.gif";
+                    isMoving = true;
+                }
+                direction = -1;
+                luigi.style.left = (luigi.offsetLeft - speed) + "px";
+                luigi.style.transform = "scaleX(-1)"; // Ruota luigi a sinistra
+            } else if (keys["ArrowRight"]) {
+                if (!isMoving) {
+                    document.getElementById("luigi").src = "running_luigi.gif";
+                    isMoving = true;
+                }
+                direction = 1;
+                luigi.style.left = (luigi.offsetLeft + speed) + "px";
+                luigi.style.transform = "scaleX(1)"; // Ruota luigi a destra
+                if (luigi.offsetLeft + luigi.offsetWidth > window.innerWidth) {
+                    luigi.style.left = "0px"; // Se luigi raggiunge il bordo destro dello schermo, torna alla posizione iniziale
+                }
+            } else {
+                if (isMoving) {
+                    document.getElementById("luigi").src = "luigi.png";
+                    isMoving = false;
+                }
+            }
+
+            if (keys[" "] && !isJumping) {
+                isJumping = true;
+                verticalSpeed = 8; // Velocità iniziale del salto
+            }
+
+            if (isJumping) {
+                document.getElementById("luigi").src = "jumping_luigi.png";
+                luigi.style.bottom = (parseInt(luigi.style.bottom) || 0) + verticalSpeed + "px";
+                verticalSpeed -= gravity; // Applica la gravità
+
+                if (parseInt(luigi.style.bottom) <= groundLevel) {
+                    luigi.style.bottom = groundLevel + "px";
+                    isJumping = false;
+                    document.getElementById("luigi").src = "luigi.png";
+                    if(isMoving){
+                        document.getElementById("luigi").src = "running_luigi.gif";
+                    }
+                }
+            }
+
+            if (isBowserJumping) {
+                bowser.style.top = (parseInt(bowser.style.top) || 0) - bowserVerticalSpeed + "px";
+                bowserVerticalSpeed -= gravity; // Applica la gravità
+
+                if (parseInt(bowser.style.top) >= bowserGroundLevel) {
+                    bowser.style.top = bowserGroundLevel + "px";
+                    isBowserJumping = false;
+                }
+            }
+
+            checkCollision(); // Controlla la collisione in ogni iterazione del game loop
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function checkCollision() {
+            // Ottieni le posizioni di luigi e Bowser
+            let luigiRect = luigi.getBoundingClientRect();
+            let bowserRect = bowser.getBoundingClientRect();
+
+            // Verifica se luigi è atterrato sulla testa di Bowser
+            if (luigiRect.bottom >= bowserRect.top && 
+                luigiRect.top <= bowserRect.bottom &&
+                luigiRect.left <= bowserRect.right &&
+                luigiRect.right >= bowserRect.left &&
+                isJumping && verticalSpeed < 0) { // Assicurati che luigi stia cadendo
+                window.location = "win.html"; // Reindirizza alla schermata di vittoria
+            }
+
+            // Verifica collisione sui lati e in basso
+            if ((luigiRect.left <= bowserRect.right && luigiRect.right >= bowserRect.left) && 
+                (luigiRect.bottom >= bowserRect.top && luigiRect.top <= bowserRect.bottom)) {
+                // Ripristina la posizione iniziale di luigi
+                luigi.style.left = luigiInitialPosition.left;
+                luigi.style.bottom = luigiInitialPosition.bottom;
+                if(vite!==0){
+                    vite-=1;
+                }
+                if(vite==0){
+                    window.location="game_over.html";
+                }
+            }
+
+            let fireballs = document.getElementsByClassName('fireball');
+            for (let i = 0; i < fireballs.length; i++) {
+                let fireballRect = fireballs[i].getBoundingClientRect();
+                if (luigiRect.bottom >= fireballRect.top && 
+                    luigiRect.top <= fireballRect.bottom &&
+                    luigiRect.left <= fireballRect.right &&
+                    luigiRect.right >= fireballRect.left) {
+                    // Collisione con la fireball, decrementa le vite di luigi e ripristina la posizione iniziale
+                    vite -= 1;
+                    if (vite === 0) {
+                        window.location = "game_over.html"; // Se le vite sono esaurite, vai alla schermata di game over
+                    } else {
+                        luigi.style.left = luigiInitialPosition.left;
+                        luigi.style.bottom = luigiInitialPosition.bottom;
+                    }
+                }
+            }
+        }
+
+        function bowserJump() {
+            if (!isBowserJumping) {
+                isBowserJumping = true;
+                bowserVerticalSpeed = 8; // Velocità iniziale del salto
+                bowserDirection *= -1; // Inverti la direzione di Bowser
+                bowser.style.transform = "scaleX(" + (bowserDirection*(-1)) + ")"; // Ruota Bowser
+                bowser.style.left = (parseInt(bowser.style.left) + (bowserDirection * 100)) + "px"; // Muovi Bowser a sinistra o a destra
+            }
+        }
+
+        function launchFireball() {
+            let fireball = document.createElement('img');
+            fireball.src = 'bowser_fire.png';
+            fireball.className = 'fireball';
+
+            if (bowserDirection === -1) {
+                fireball.style.left = bowser.offsetLeft + 'px';
+            } else {
+                fireball.style.left = (bowser.offsetLeft + bowser.offsetWidth - fireball.offsetWidth) + 'px';
+            }
+
+            fireball.style.top = bowser.offsetTop + 300 + 'px'; // Posiziona la palla di fuoco all'altezza di Bowser
+            fireball.dataset.direction = bowserDirection; // Memorizza la direzione corrente di Bowser
+            document.body.appendChild(fireball);
+
+            let fireballInterval = setInterval(function() {
+                fireball.style.left = (parseInt(fireball.style.left) + (parseInt(fireball.dataset.direction) * 5)) + 'px'; // Muovi la palla di fuoco nella direzione memorizzata
+
+                // Rimuovi la palla di fuoco se esce dallo schermo
+                if (parseInt(fireball.style.left) < 0 || parseInt(fireball.style.left) > window.innerWidth) {
+                    clearInterval(fireballInterval);
+                    fireball.remove();
+                }
+            }, 20);
+        }
+
+        setInterval(bowserJump, 5000); // Fai saltare Bowser ogni 5 secondi
+        setInterval(launchFireball, 1000); // Lancia una palla di fuoco ogni 2 secondi
+
+        gameLoop();
+    </script>    
+</body>
+</html>

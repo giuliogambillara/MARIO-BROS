@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scelta del Personaggio</title>
+    <style>
+        body {
+            text-align: center;
+            background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .img {
+            width: 100px;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+        .personaggio:hover {
+            transform: scale(1.2);
+        }
+        h1 {
+            color: #333;
+            text-shadow: 2px 2px #999;
+        }
+        p {
+            color: #333;
+            font-size: 18px;
+            text-shadow: 1px 1px #999;
+        }
+    </style>
+</head>
+<body>
+    <h1>Seleziona il tuo personaggio:</h1>
+    <p>Mario: <img id="mario" onmouseover="changeImage('mario', 'jumping.png')" onmouseout="changeImage('mario', 'standing.png')" onclick="selectCharacter('Mario')" class="img personaggio" src="standing.png" alt="Mario"></p>
+    <p>Luigi: <img id="luigi" onmouseover="changeImage('luigi', 'jumping_luigi.png')" onmouseout="changeImage('luigi', 'luigi.png')" onclick="selectCharacter('Luigi')" class="img personaggio" src="luigi.png" alt="Luigi"></p>
+    <script>
+        function selectCharacter(character) {
+            if (confirm("Confermi la scelta di " + character + " come personaggio con cui giocare?")) {
+                window.location.href = character + ".html";
+            } else {
+                alert('Operazione annullata');
+            }
+        }
+
+        function changeImage(id, newImage) {
+            document.getElementById(id).src = newImage;
+        }
+    </script>
+</body>
+</html>

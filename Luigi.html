@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>luigi RACE</title>
+    <style>
+        body{
+            margin:0;
+            background-image: url("mariobros_back.jpg");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+        .campo{
+            width: auto;
+            height: 400px;
+            margin-top: 15%;
+            background-color: white;
+        }
+        .cielo{
+            width: auto;
+            height: 200px;
+            background-color: aqua;
+            position: relative;
+        }
+        .terreno{
+            width: auto;
+            height: 200px;
+            background-image: url("terreno.jpg");
+        }
+        .personaggio{
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            transition: transform 0.01s;
+        }
+    </style>
+</head>
+<body>
+    <audio autoplay loop>
+        <source src="Super Mario Bros Theme Song.mp3" type="audio/mpeg">
+    </audio>
+    <div class="campo">
+        <div class="cielo">
+            <img src="tubo.png" style="position: absolute; top: 152px; left:1412px; height: 50px; width:auto;" id="tubo">
+            <img src="goomba.gif" style="position: absolute; top: 175px; left: 700px; height: 25px; width: auto;" id="goomba">
+            <img src="goomba.gif" style="position: absolute; top: 175px; left: 900px; height: 25px; width: auto;" id="goomba2">
+            <img src="luckyblock.png" style="position: absolute; top: 100px; left: 50px; height: 30px; width: auto;">
+            <img src="luigi.png" class="personaggio" id="luigi" style="height: 35px; width: auto;">
+        </div>
+        <div class="terreno"></div>
+    </div>
+    <script type="text/javascript">
+        let tubo=document.getElementById("tubo");
+        let goomba = document.getElementById("goomba");
+        let goomba2 = document.getElementById("goomba2");
+        let luigi = document.getElementById('luigi');
+        let speed = 2; // Velocità di movimento di luigi
+        let speed_goomba = 1;
+        let direction = 0; // Direzione di luigi
+        let goomba_dir = 1; // Direzione di Goomba
+        let keys = {};
+        let isMoving = false;
+        let isJumping = false; // Stato di salto di luigi
+        let verticalSpeed = 0; // Velocità verticale di luigi
+        let gravity = 0.3; // Forza di gravità
+        let groundLevel = 0; // Livello del terreno
+        let vite=3;
+
+        window.addEventListener('keydown', function(event) {
+            keys[event.key] = true;
+        });
+
+        window.addEventListener('keyup', function(event) {
+            keys[event.key] = false;
+        });
+
+        setInterval(function() {
+            goomba_dir = goomba_dir * -1;
+        }, 1500);
+
+        function gameLoop() {
+            if (goomba_dir == 1) {
+                goomba.style.left = (goomba.offsetLeft - speed_goomba) + "px";
+                goomba2.style.left = (goomba2.offsetLeft + speed_goomba)+"px";
+            } else {
+                goomba.style.left = (goomba.offsetLeft + speed_goomba) + "px";
+                goomba2.style.left = (goomba2.offsetLeft - speed_goomba)+"px";
+
+            }
+
+            let luigiPos = luigi.offsetLeft + luigi.offsetWidth / 2;
+            let goombaPos = goomba.offsetLeft + goomba.offsetWidth / 2;
+            let goomba2Pos = goomba2.offsetLeft + goomba2.offsetWidth/2;
+
+            if (Math.abs(luigiPos - goombaPos) < (luigi.offsetWidth + goomba.offsetWidth) / 2) {
+                let luigiTop = luigi.offsetTop;
+                let luigiBottom = luigi.offsetTop + luigi.offsetHeight;
+                let goombaTop = goomba.offsetTop;
+                let goombaBottom = goomba.offsetTop + goomba.offsetHeight;
+
+                if (!(luigiBottom < goombaTop || luigiTop > goombaBottom)) {
+                    luigi.style.left = "0px";
+                    vite-=1;
+                    if(vite!==0){
+                        console.log("Hai perso una vita");
+                    }
+                    if(vite==0){
+                        window.location="game_over.html";
+                        console.log("game over");
+                    }
+                }
+            }
+            if (luigi.style.left=="1412px"){
+                window.location="level2_luigi.html";
+            }
+            if (Math.abs(luigiPos - goomba2Pos) < (luigi.offsetWidth + goomba2.offsetWidth) / 2) {
+                let luigiTop = luigi.offsetTop;
+                let luigiBottom = luigi.offsetTop + luigi.offsetHeight;
+                let goomba2Top = goomba2.offsetTop;
+                let goomba2Bottom = goomba2.offsetTop + goomba2.offsetHeight;
+
+                if (!(luigiBottom < goomba2Top || luigiTop > goomba2Bottom)) {
+                    luigi.style.left = "0px";
+                    vite-=1;
+                    if(vite!==0){
+                        console.log("Hai perso una vita");
+                    }
+                    if(vite==0){
+                        window.location="game_over.html";
+                        console.log("game over");
+                    }
+                }
+            }
+
+            if (keys["ArrowLeft"] && luigi.offsetLeft >= 0) {
+                if (!isMoving) {
+                    document.getElementById("luigi").src = "running_luigi.gif";
+                    isMoving = true;
+                }
+                direction = -1;
+                luigi.style.left = (luigi.offsetLeft - speed) + "px";
+                luigi.style.transform = "scaleX(-1)"; // Ruota Luigi a sinistra
+            } else if (keys["ArrowRight"]) {
+                if (!isMoving) {
+                    document.getElementById("luigi").src = "running_luigi.gif";
+                    isMoving = true;
+                }
+                direction = 1;
+                luigi.style.left = (luigi.offsetLeft + speed) + "px";
+                luigi.style.transform = "scaleX(1)"; // Ruota Luigi a destra
+                if (luigi.offsetLeft + luigi.offsetWidth > window.innerWidth) {
+                    luigi.style.left = "0px"; // Se Luigi raggiunge il bordo destro dello schermo, torna alla posizione iniziale
+                }
+            } else {
+                if (isMoving) {
+                    document.getElementById("luigi").src = "luigi.png";
+                    isMoving = false;
+                }
+            }
+
+            if (keys[" "] && !isJumping) {
+                isJumping = true;
+                verticalSpeed = 7; // Velocità iniziale del salto
+            }
+
+            if (isJumping) {
+                document.getElementById("luigi").src = "jumping_luigi.png";
+                luigi.style.bottom = (parseInt(luigi.style.bottom) || 0) + verticalSpeed + "px";
+                verticalSpeed -= gravity; // Applica la gravità
+
+                if (parseInt(luigi.style.bottom) <= groundLevel) {
+                    luigi.style.bottom = groundLevel + "px";
+                    isJumping = false;
+                    document.getElementById("luigi").src = "luigi.png";
+                    if(isMoving){
+                        document.getElementById("luigi").src = "running_luigi.gif";
+                    }
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+        gameLoop();
+    </script>    
+</body>
+</html>

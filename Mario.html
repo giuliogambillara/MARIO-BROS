@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MARIO RACE</title>
+    <style>
+        body{
+            margin:0;
+            background-image: url("mariobros_back.jpg");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+        .campo{
+            width: auto;
+            height: 400px;
+            margin-top: 15%;
+            background-color: white;
+        }
+        .cielo{
+            width: auto;
+            height: 200px;
+            background-color: aqua;
+            position: relative;
+        }
+        .terreno{
+            width: auto;
+            height: 200px;
+            background-image: url("terreno.jpg");
+        }
+        .personaggio{
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            transition: transform 0.01s;
+        }
+    </style>
+</head>
+<body>
+    <audio autoplay loop>
+        <source src="Super Mario Bros Theme Song.mp3" type="audio/mpeg">
+    </audio>
+    <div class="campo">
+        <div class="cielo">
+            <img src="tubo.png" style="position: absolute; top: 152px; left:1412px; height: 50px; width:auto;" id="tubo">
+            <img src="goomba.gif" style="position: absolute; top: 175px; left: 700px; height: 25px; width: auto;" id="goomba">
+            <img src="goomba.gif" style="position: absolute; top: 175px; left: 900px; height: 25px; width: auto;" id="goomba2">
+            <img src="luckyblock.png" style="position: absolute; top: 100px; left: 50px; height: 30px; width: auto;">
+            <img src="standing.png" class="personaggio" id="mario" style="height: 35px; width: auto;">
+        </div>
+        <div class="terreno"></div>
+    </div>
+    <script type="text/javascript">
+        let tubo=document.getElementById("tubo");
+        let goomba = document.getElementById("goomba");
+        let goomba2 = document.getElementById("goomba2");
+        let mario = document.getElementById('mario');
+        let speed = 2; //Velocità di movimento di Mario
+        let speed_goomba = 1;
+        let direction = 0; // Direzione di Mario
+        let goomba_dir = 1; // Direzione di Goomba
+        let keys = {};
+        let isMoving = false;
+        let isJumping = false; // Stato di salto di Mario
+        let verticalSpeed = 0; // Velocità verticale di Mario
+        let gravity = 0.3; // Forza di gravità
+        let groundLevel = 0; // Livello del terreno
+        let vite=3; //numero di vite (3 per livello)
+
+        window.addEventListener('keydown', function(event) {
+            keys[event.key] = true;
+        });
+
+        window.addEventListener('keyup', function(event) {
+            keys[event.key] = false;
+        });
+
+        setInterval(function() {
+            goomba_dir = goomba_dir * -1;
+        }, 1500);
+
+        function gameLoop() {
+            //Verifico le direzioni dei goomba
+            if (goomba_dir == 1) {
+                goomba.style.left = (goomba.offsetLeft - speed_goomba) + "px";
+                goomba2.style.left = (goomba2.offsetLeft + speed_goomba)+"px";
+            } else {
+                goomba.style.left = (goomba.offsetLeft + speed_goomba) + "px";
+                goomba2.style.left = (goomba2.offsetLeft - speed_goomba)+"px";
+
+            }
+
+            //Hitbox di Mario e dei Goomba
+            let marioPos = mario.offsetLeft + mario.offsetWidth / 2;
+            let goombaPos = goomba.offsetLeft + goomba.offsetWidth / 2;
+            let goomba2Pos = goomba2.offsetLeft + goomba2.offsetWidth/2;
+
+            //Verifico se Mario colpisce i Goomba
+            if (Math.abs(marioPos - goombaPos) < (mario.offsetWidth + goomba.offsetWidth) / 2) {
+                let marioTop = mario.offsetTop;
+                let marioBottom = mario.offsetTop + mario.offsetHeight;
+                let goombaTop = goomba.offsetTop;
+                let goombaBottom = goomba.offsetTop + goomba.offsetHeight;
+
+                if (!(marioBottom < goombaTop || marioTop > goombaBottom)) {
+                    mario.style.left = "0px";
+                    vite-=1;
+                    if(vite!==0){
+                        console.log("Hai perso una vita");
+                    }
+                    if(vite==0){
+                        window.location="game_over.html";
+                        console.log("game over");
+                    }
+                }
+            }
+
+            if (Math.abs(marioPos - goomba2Pos) < (mario.offsetWidth + goomba2.offsetWidth) / 2) {
+                let marioTop = mario.offsetTop;
+                let marioBottom = mario.offsetTop + mario.offsetHeight;
+                let goomba2Top = goomba2.offsetTop;
+                let goomba2Bottom = goomba2.offsetTop + goomba2.offsetHeight;
+
+                if (!(marioBottom < goomba2Top || marioTop > goomba2Bottom)) {
+                    mario.style.left = "0px";
+                    vite-=1;
+                    if(vite!==0){
+                        console.log("Hai perso una vita");
+                    }
+                    if(vite==0){
+                        window.location="game_over.html";
+                        console.log("game over");
+                    }
+                }
+            }
+
+            //Se Mario giunge vivo al tubo allora accede al secondo livello
+            if (mario.style.left=="1412px"){
+                window.location="level2.html";
+            }
+
+            //Codice per movimento e salto di Mario
+            if (keys["ArrowLeft"] && mario.offsetLeft >= 0) {
+                if (!isMoving) {
+                    document.getElementById("mario").src = "running.gif";
+                    isMoving = true;
+                }
+                direction = -1;
+                mario.style.left = (mario.offsetLeft - speed) + "px";
+                mario.style.transform = "scaleX(-1)"; // Ruota Mario a sinistra
+            } else if (keys["ArrowRight"]) {
+                if (!isMoving) {
+                    document.getElementById("mario").src = "running.gif";
+                    isMoving = true;
+                }
+                direction = 1;
+                mario.style.left = (mario.offsetLeft + speed) + "px";
+                mario.style.transform = "scaleX(1)"; // Ruota Mario a destra
+            } else {
+                if (isMoving) {
+                    document.getElementById("mario").src = "standing.png";
+                    isMoving = false;
+                }
+            }
+
+            if (keys[" "] && !isJumping) {
+                isJumping = true;
+                verticalSpeed = 7; // Velocità iniziale del salto
+            }
+
+            if (isJumping) {
+                document.getElementById("mario").src = "jumping.png";
+                mario.style.bottom = (parseInt(mario.style.bottom) || 0) + verticalSpeed + "px";
+                verticalSpeed -= gravity; // Applica la gravità
+
+                if (parseInt(mario.style.bottom) <= groundLevel) {
+                    mario.style.bottom = groundLevel + "px";
+                    isJumping = false;
+                    document.getElementById("mario").src = "standing.png";
+                    if(isMoving){
+                        document.getElementById("mario").src = "running.gif";
+                    }
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+        gameLoop();
+    </script>    
+</body>
+</html>
